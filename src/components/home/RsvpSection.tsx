@@ -13,21 +13,17 @@ interface RsvpProps {
   onRsvpClick?: () => void
 }
 
-type FormData = Omit<RSVPInput, 'attendance'> & {
+type FormData = Omit<RSVPInput, 'attendance' | 'guestCount'> & {
   attendance: RSVPInput['attendance'] | ''
+  guestCount: string
 }
-
-const guestCountOptions = Array.from({ length: 3 }, (_, count) => count)
 
 const initialFormData: FormData = {
   firstName: '',
   lastName: '',
   phone: '',
-  smsConsent: false,
   attendance: '',
-  maleGuestCount: 0,
-  femaleGuestCount: 0,
-  childGuestCount: 0,
+  guestCount: '1',
   message: '',
 }
 
@@ -51,22 +47,9 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value, type } = e.target
-    const numericFields = [
-      'maleGuestCount',
-      'femaleGuestCount',
-      'childGuestCount',
-    ]
+    const { name, value } = e.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === 'checkbox'
-          ? (e.target as HTMLInputElement).checked
-          : numericFields.includes(name)
-            ? Number(value)
-            : value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -178,61 +161,23 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
           </div>
         </div>
 
-        <div className="form-row plus-ones-row">
-          <h3 className="form-subheader">Total Attending</h3>
-          <p className="form-helper">
-            Please include yourself and everyone attending with you.
-          </p>
-
-          <div className="form-group">
-            <label htmlFor="maleGuestCount">Men</label>
-            <select
-              id="maleGuestCount"
-              name="maleGuestCount"
-              value={formData.maleGuestCount}
+        <div className="form-row">
+          <div className="form-group full-width">
+            <label htmlFor="guestCount">Number of Guests *</label>
+            <input
+              type="number"
+              id="guestCount"
+              name="guestCount"
+              value={formData.guestCount}
               onChange={handleChange}
+              min={1}
+              step={1}
+              inputMode="numeric"
               required
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="femaleGuestCount">Women</label>
-            <select
-              id="femaleGuestCount"
-              name="femaleGuestCount"
-              value={formData.femaleGuestCount}
-              onChange={handleChange}
-              required
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="childGuestCount">Children</label>
-            <select
-              id="childGuestCount"
-              name="childGuestCount"
-              value={formData.childGuestCount}
-              onChange={handleChange}
-              required
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
+            />
+            <p className="form-helper">
+              Please include yourself and everyone attending with you.
+            </p>
           </div>
         </div>
 
@@ -251,24 +196,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
         </div>
 
         <div className="form-row">
-          <div className="form-group full-width form-group-checkbox">
-            <label htmlFor="smsConsent">
-              <input
-                type="checkbox"
-                id="smsConsent"
-                name="smsConsent"
-                checked={formData.smsConsent}
-                onChange={handleChange}
-              />
-              <span>
-                <strong>SMS updates (optional):</strong> I consent to receive
-                text messages from the Fayemi family about this event,
-                including updates and reminders. Message frequency may vary.
-                Message & data rates may apply. Reply STOP to opt out, HELP
-                for help. This is not required to submit your RSVP.
-              </span>
-            </label>
-
+          <div className="form-group full-width">
             <p className="form-legal-links">
               <button
                 type="button"
@@ -305,19 +233,6 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
             yourself and the guests listed in your party.
           </p>
           <p>
-            <strong>SMS Program.</strong> If you check the SMS consent box,
-            you agree to receive text messages from the Fayemi family at the
-            phone number you provided, related to this event (such as date
-            reminders, schedule changes, or logistics updates). Message
-            frequency may vary. Message and data rates may apply based on
-            your carrier and plan. Consent to receive texts is not required
-            to submit your RSVP.
-          </p>
-          <p>
-            You can opt out of text messages at any time by replying STOP to
-            any message. Reply HELP for assistance.
-          </p>
-          <p>
             RSVP entries may be edited or removed by the event organizers,
             including to correct guest counts or contact details.
           </p>
@@ -331,14 +246,6 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
             this form, including your name, phone number, attendance
             status, guest counts, and any message you provide, solely to
             plan and manage this event.
-          </p>
-          <p>
-            <strong>SMS consent.</strong> SMS consent is optional and is not
-            required to submit your RSVP. If you opt in to receive text
-            messages, your phone number is used only to send you updates
-            related to this event. Your phone number and SMS consent status
-            are not shared with third parties or used for marketing
-            purposes.
           </p>
           <p>
             Your information is not sold, rented, or shared outside of what

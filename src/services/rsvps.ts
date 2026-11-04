@@ -7,9 +7,6 @@ export interface RsvpDashboardStats {
   yes_responses: number
   no_responses: number
   total_attending_guests: number
-  total_men: number
-  total_women: number
-  total_children: number
 }
 
 function getSupabaseClient() {
@@ -42,13 +39,9 @@ export async function createRsvp(input: RSVPInput): Promise<RsvpRecord> {
     first_name: input.firstName,
     last_name: input.lastName,
     phone: input.phone,
-    sms_consent: input.smsConsent,
     attendance: input.attendance,
-    male_guest_count: input.maleGuestCount,
-    female_guest_count: input.femaleGuestCount,
-    child_guest_count: input.childGuestCount,
+    guest_count: input.guestCount,
     message: input.message?.trim() || null,
-    table_id: null,
   }
 
   const { data, error } = await client
@@ -74,13 +67,9 @@ export async function updateRsvp(
     first_name: input.first_name.trim(),
     last_name: input.last_name.trim(),
     phone: input.phone.trim(),
-    sms_consent: input.sms_consent,
     attendance: input.attendance,
-    male_guest_count: input.male_guest_count,
-    female_guest_count: input.female_guest_count,
-    child_guest_count: input.child_guest_count,
+    guest_count: input.guest_count,
     message: input.message?.trim() || null,
-    table_id: input.table_id,
   }
 
   const { data, error } = await client

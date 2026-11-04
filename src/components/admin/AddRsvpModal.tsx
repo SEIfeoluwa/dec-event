@@ -11,21 +11,17 @@ interface AddRsvpModalProps {
   onCreated: (rsvp: RsvpRecord) => void
 }
 
-type FormData = Omit<RSVPInput, 'attendance'> & {
+type FormData = Omit<RSVPInput, 'attendance' | 'guestCount'> & {
   attendance: RSVPInput['attendance'] | ''
+  guestCount: string
 }
-
-const guestCountOptions = Array.from({ length: 3 }, (_, count) => count)
 
 const initialFormData: FormData = {
   firstName: '',
   lastName: '',
   phone: '',
-  smsConsent: false,
   attendance: '',
-  maleGuestCount: 0,
-  femaleGuestCount: 0,
-  childGuestCount: 0,
+  guestCount: '1',
   message: '',
 }
 
@@ -37,18 +33,9 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    const { name, value, type } = e.target
-    const numericFields = ['maleGuestCount', 'femaleGuestCount', 'childGuestCount']
+    const { name, value } = e.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === 'checkbox'
-          ? (e.target as HTMLInputElement).checked
-          : numericFields.includes(name)
-            ? Number(value)
-            : value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -133,54 +120,19 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
           </select>
         </div>
 
-        <div className="form-row plus-ones-row">
-          <div className="form-group">
-            <label htmlFor="addRsvpMale">Men</label>
-            <select
-              id="addRsvpMale"
-              name="maleGuestCount"
-              value={formData.maleGuestCount}
-              onChange={handleChange}
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="addRsvpFemale">Women</label>
-            <select
-              id="addRsvpFemale"
-              name="femaleGuestCount"
-              value={formData.femaleGuestCount}
-              onChange={handleChange}
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="addRsvpChild">Children</label>
-            <select
-              id="addRsvpChild"
-              name="childGuestCount"
-              value={formData.childGuestCount}
-              onChange={handleChange}
-            >
-              {guestCountOptions.map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="form-group">
+          <label htmlFor="addRsvpGuestCount">Number of Guests</label>
+          <input
+            id="addRsvpGuestCount"
+            name="guestCount"
+            type="number"
+            value={formData.guestCount}
+            onChange={handleChange}
+            min={1}
+            step={1}
+            inputMode="numeric"
+            required
+          />
         </div>
 
         <div className="form-group">
@@ -193,19 +145,6 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
             placeholder="Any notes"
             rows={3}
           />
-        </div>
-
-        <div className="form-group-checkbox">
-          <label htmlFor="addRsvpSmsConsent">
-            <input
-              type="checkbox"
-              id="addRsvpSmsConsent"
-              name="smsConsent"
-              checked={formData.smsConsent}
-              onChange={handleChange}
-            />
-            <span>Guest consents to receive SMS updates about this event.</span>
-          </label>
         </div>
 
         {error && <p className="form-status form-status-error">{error}</p>}

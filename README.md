@@ -27,7 +27,7 @@ npm run dev
 
 ## What This Project Is
 
-This is a single-page event RSVP site. Guests can submit their name, phone number, attendance status, party counts, an optional message, and an optional SMS consent opt-in. Admin users can log in to view RSVP totals, edit responses, and delete entries.
+This is a single-page event RSVP site. Guests can submit their name, phone number, attendance status, number of guests in their party, and an optional message. Admin users can log in to view RSVP totals, edit responses, and delete entries.
 
 The app exists to provide a simple public RSVP experience while keeping the RSVP list and dashboard behind Supabase authentication and row-level security policies.
 
@@ -54,7 +54,7 @@ npm run test:watch # run tests in watch mode
 
 ## How To Use It
 
-Guests use the public form on `/` to submit one RSVP party. A party can include up to 6 total attendees: 2 men, 2 women, and 2 children.
+Guests use the public form on `/` to submit one RSVP party, entering the total number of guests in their party (at least 1, no upper limit).
 
 Admins use `/admin/login` with a Supabase auth account. After logging in, `/admin/dashboard` shows response totals and the RSVP table. Admins can edit RSVP details or delete entries.
 
@@ -67,10 +67,8 @@ The public form inserts into `public.rsvps`, so RLS needs an `INSERT` policy for
 Recommended submit policy constraints:
 
 - `attendance` is `yes` or `no`
-- each guest category is between `0` and `2`
-- total guest count is between `1` and `6`
+- `guest_count` is a whole number of at least `1`
 - first name, last name, and phone are required
-- `sms_consent` is a boolean, defaults to `false`, and is optional (guests are not required to opt in)
 - message is optional and no longer than `500` characters
 
 To prevent duplicate phone submissions, add a unique normalized-phone index:
