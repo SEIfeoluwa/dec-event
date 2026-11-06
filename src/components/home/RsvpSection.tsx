@@ -126,7 +126,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
   return (
     <section className="rsvp-form" id="rsvp-form-section">
       <h2>Will you be attending?</h2>
-      <p>Please respond by August 19</p>
+      <p>Please respond by November 29</p>
 
       <form onSubmit={handleSubmit} className="rsvp-form-container">
         <div className="form-row rsvp-contact-row">

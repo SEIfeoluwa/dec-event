@@ -5,11 +5,16 @@ export default function About() {
     <section className="about">
       <div className="about-content">
         <div className="about-text">
-          <h3>A Lifetime Worth Celebrating</h3>
+          <h3>Faithful &amp; Favored</h3>
           <p>
-            Together they have shared decades of love, laughter, and unforgettable stories. This year, we gather to honor
-            two extraordinary milestones with an evening of fine dining, live music, and cherished company. Come raise a
-            glass to the years behind &mdash; and the many still to come.
+            Six decades of unwavering faith, dedicated leadership, and profound impact! Join us as we gather to celebrate
+            the 60th birthday of our beloved Pastor Oluwakemi Adebisi.
+          </p>
+          <p>
+            Reflecting the words of Luke 1:28 &mdash; &ldquo;Greetings, you who are highly favored! The Lord is with
+            you&rdquo; &mdash; Pastor Oluwakemi has exemplified through every season what it means to walk in divine
+            purpose, anchored by God&rsquo;s faithfulness and crowned with His grace. Let us come together to honor her
+            legacy, offer our thanksgiving, and celebrate this monumental milestone of being Faithful &amp; Favored.
           </p>
 
           <dl className="event-details">
@@ -23,11 +28,11 @@ export default function About() {
             </div>
             <div>
               <dt>Dress Code</dt>
-              <dd>Traditional</dd>
+              <dd>Grace &amp; Royalty</dd>
             </div>
             <div>
               <dt>Color of the Day</dt>
-              <dd>TBD</dd>
+              <dd>Touch of Blue</dd>
             </div>
           </dl>
         </div>
