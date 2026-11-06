@@ -18,10 +18,23 @@ export default function Gallery() {
   return (
     <section className="gallery">
       <h2>Gallery</h2>
-      <div className="gallery-grid">
-        {galleryImages.map((image) => (
-          <img key={image.src} src={image.src} alt={image.alt} loading="lazy" decoding="async" />
-        ))}
+      <div className="gallery-marquee">
+        {/* The photos are rendered twice so the strip can loop seamlessly;
+            the second copy is hidden from screen readers. */}
+        <div className="gallery-track">
+          {[...galleryImages, ...galleryImages].map((image, index) => {
+            const isCopy = index >= galleryImages.length
+            return (
+              <img
+                key={index}
+                src={image.src}
+                alt={isCopy ? '' : image.alt}
+                aria-hidden={isCopy || undefined}
+                decoding="async"
+              />
+            )
+          })}
+        </div>
       </div>
     </section>
   )

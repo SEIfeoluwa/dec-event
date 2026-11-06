@@ -344,40 +344,81 @@
     text-shadow: none;
   }
 
-  .gallery-grid {
+  /* Auto-scrolling strip: no scrollbar, loops forever, pauses on hover */
+  .gallery-marquee {
     max-width: 1500px;
     margin: 0 auto;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    padding: 0 4px 14px;
-    scroll-padding-inline: 4px;
-    scroll-snap-type: x mandatory;
-    scrollbar-color: var(--event-royal) rgba(10, 42, 82, 0.12);
-    scrollbar-width: thin;
+    overflow: hidden;
+    /* Room for the hover lift and shadows so they aren't clipped */
+    padding: 8px 0 24px;
+    /* Soft fade at both edges */
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
 
-    @media (max-width: 768px) {
-      gap: 14px;
+    &:hover .gallery-track {
+      animation-play-state: paused;
     }
+  }
+
+  .gallery-track {
+    display: flex;
+    width: max-content;
+    /* The track holds two copies of the photos; moving it by half its
+       width lands exactly where it started, so the loop is seamless. */
+    animation: gallery-scroll 60s linear infinite;
 
     img {
       width: 300px;
       aspect-ratio: 4 / 5;
+      /* Spacing is a margin (not flex gap) so both copies are equal width */
+      margin-right: 10px;
       border-radius: 8px;
       flex: 0 0 auto;
       object-fit: cover;
       /* Keep faces in frame when full-length shots are cropped to 4:5 */
       object-position: center 20%;
-      scroll-snap-align: start;
       box-shadow: 0 14px 30px rgba(10, 42, 82, 0.12);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      @media (max-width: 768px) {
+        width: 240px;
+        margin-right: 14px;
+      }
 
       &:hover {
         box-shadow: 0 18px 38px rgba(10, 42, 82, 0.18);
         transform: translateY(-4px);
       }
     }
+  }
+
+  /* Visitors who ask for less motion get a still, swipeable row instead */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-marquee {
+      overflow-x: auto;
+      scrollbar-width: none;
+      mask-image: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .gallery-track {
+      animation: none;
+
+      img[aria-hidden='true'] {
+        display: none;
+      }
+    }
+  }
+}
+
+@keyframes gallery-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 
