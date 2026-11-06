@@ -15,8 +15,8 @@ export default function HomePage() {
     <main>
       <Hero onRsvpClick={scrollToRsvpForm} />
       <About />
-      <Gallery />
       <Schedule />
+      <Gallery />
       <Rsvp onRsvpClick={scrollToRsvpForm} />
     </main>
   )
