@@ -31,3 +31,4 @@ dist-ssr
 
 # Drizzle generated migrations (we use db:push)
 drizzle/
+.neon
