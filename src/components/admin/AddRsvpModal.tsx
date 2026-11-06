@@ -17,8 +17,7 @@ type FormData = Omit<RSVPInput, 'attendance' | 'guestCount'> & {
 }
 
 const initialFormData: FormData = {
-  firstName: '',
-  lastName: '',
+  fullName: '',
   phone: '',
   attendance: '',
   guestCount: '1',
@@ -66,30 +65,17 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
   return (
     <Modal title="Add RSVP" onClose={onClose}>
       <form className="add-rsvp-form" onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="addRsvpFirstName">First Name</label>
-            <input
-              id="addRsvpFirstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              placeholder="Enter first name"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="addRsvpLastName">Last Name</label>
-            <input
-              id="addRsvpLastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              placeholder="Enter last name"
-              required
-            />
-          </div>
+        <div className="form-group">
+          <label htmlFor="addRsvpFullName">Full Name</label>
+          <input
+            id="addRsvpFullName"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            placeholder="Enter full name"
+            autoComplete="off"
+            required
+          />
         </div>
 
         <div className="form-group">
@@ -120,20 +106,22 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
           </select>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="addRsvpGuestCount">Number of Guests</label>
-          <input
-            id="addRsvpGuestCount"
-            name="guestCount"
-            type="number"
-            value={formData.guestCount}
-            onChange={handleChange}
-            min={1}
-            step={1}
-            inputMode="numeric"
-            required
-          />
-        </div>
+        {formData.attendance === 'yes' && (
+          <div className="form-group">
+            <label htmlFor="addRsvpGuestCount">Number of Guests</label>
+            <input
+              id="addRsvpGuestCount"
+              name="guestCount"
+              type="number"
+              value={formData.guestCount}
+              onChange={handleChange}
+              min={1}
+              step={1}
+              inputMode="numeric"
+              required
+            />
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="addRsvpMessage">Message (Optional)</label>

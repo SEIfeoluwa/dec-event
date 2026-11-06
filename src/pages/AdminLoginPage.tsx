@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { supabase } from '../services/supabase'
+import { getSession, login } from '../services/rsvps'
 
 export default function AdminLoginPage() {
   const navigate = useNavigate()
@@ -13,18 +13,13 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      if (!supabase) {
-        setCheckingSession(false)
-        return
-      }
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session) {
-        navigate('/admin/dashboard', { replace: true })
-        return
+      try {
+        if (await getSession()) {
+          navigate('/admin/dashboard', { replace: true })
+          return
+        }
+      } catch {
+        // Server unreachable: show the form; logging in will surface the error
       }
 
       setCheckingSession(false)
@@ -37,20 +32,9 @@ export default function AdminLoginPage() {
     event.preventDefault()
     setError(null)
 
-    if (!supabase) {
-      setError('Missing Supabase environment variables.')
-      return
-    }
-
     try {
       setLoading(true)
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
+      await login(email, password)
       navigate('/admin/dashboard', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to log in.')

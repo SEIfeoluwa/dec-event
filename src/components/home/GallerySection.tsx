@@ -1,15 +1,17 @@
-import galleryImageOne from '../../assets/placeholder.svg'
-import galleryImageTwo from '../../assets/placeholder.svg'
-import galleryImageThree from '../../assets/placeholder.svg'
-import galleryImageFour from '../../assets/placeholder.svg'
-import galleryImageFive from '../../assets/placeholder.svg'
+import galleryImageOne from '../../assets/gallery-1.jpg'
+import galleryImageTwo from '../../assets/gallery-2.jpg'
+import galleryImageThree from '../../assets/gallery-3.jpg'
+import galleryImageFour from '../../assets/gallery-4.jpg'
+import galleryImageFive from '../../assets/gallery-5.jpg'
+import galleryImageSix from '../../assets/gallery-6.jpg'
 
 const galleryImages = [
-  { src: galleryImageOne, alt: 'Paul and Abosede celebration photo 1' },
-  { src: galleryImageTwo, alt: 'Paul and Abosede celebration photo 2' },
-  { src: galleryImageThree, alt: 'Paul and Abosede celebration photo 3' },
-  { src: galleryImageFour, alt: 'Paul and Abosede celebration photo 4' },
-  { src: galleryImageFive, alt: 'Paul and Abosede celebration photo 5' },
+  { src: galleryImageOne, alt: 'Pastor Mrs Adebisi in a teal pleated gown' },
+  { src: galleryImageTwo, alt: 'Pastor Mrs Adebisi in a pink striped blouse, seated at a table' },
+  { src: galleryImageThree, alt: 'Pastor Mrs Adebisi in a teal gown, smiling with a hand on her hip' },
+  { src: galleryImageFour, alt: 'Pastor Mrs Adebisi in a royal blue gown, seated on a tufted chair' },
+  { src: galleryImageFive, alt: 'Pastor Mrs Adebisi in a teal pleated gown, full length' },
+  { src: galleryImageSix, alt: 'Close portrait of Pastor Mrs Adebisi in a pink striped blouse' },
 ]
 
 export default function Gallery() {
@@ -18,7 +20,7 @@ export default function Gallery() {
       <h2>Gallery</h2>
       <div className="gallery-grid">
         {galleryImages.map((image) => (
-          <img key={image.src} src={image.src} alt={image.alt} />
+          <img key={image.src} src={image.src} alt={image.alt} loading="lazy" decoding="async" />
         ))}
       </div>
     </section>

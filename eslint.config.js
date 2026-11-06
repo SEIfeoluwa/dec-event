@@ -19,4 +19,11 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // API, shared rules and scripts run in Node
+    files: ['api/**/*.ts', 'server/**/*.ts', 'shared/**/*.ts', 'scripts/**/*.ts', '*.config.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

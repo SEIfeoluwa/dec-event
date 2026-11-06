@@ -1,4 +1,4 @@
-import aboutImage from '../../assets/placeholder.svg'
+import aboutImage from '../../assets/about.jpg'
 
 export default function About() {
   return (
@@ -15,11 +15,11 @@ export default function About() {
           <dl className="event-details">
             <div>
               <dt>Date &amp; Time</dt>
-              <dd>Saturday, Sept 19 &middot; 3:00 PM</dd>
+              <dd>Tuesday, Dec 8 &middot; 6:00 PM</dd>
             </div>
             <div>
               <dt>Location</dt>
-              <dd>Richland Golf Club</dd>
+              <dd>1625 Olive St NE, Washington, DC 20019</dd>
             </div>
             <div>
               <dt>Dress Code</dt>
@@ -27,11 +27,11 @@ export default function About() {
             </div>
             <div>
               <dt>Color of the Day</dt>
-              <dd>Wine and gold</dd>
+              <dd>TBD</dd>
             </div>
           </dl>
         </div>
-        <img src={aboutImage} alt="Paul and Abosede" />
+        <img src={aboutImage} alt="Portrait of Pastor Mrs Adebisi in a pink striped blouse" />
       </div>
     </section>
   )

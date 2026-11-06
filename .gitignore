@@ -25,3 +25,9 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Windows download markers (WSL)
+*:Zone.Identifier
+
+# Drizzle generated migrations (we use db:push)
+drizzle/

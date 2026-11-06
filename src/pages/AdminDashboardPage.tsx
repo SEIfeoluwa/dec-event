@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import AddRsvpModal from '../components/admin/AddRsvpModal'
-import { deleteRsvp, getRsvpDashboardStats, updateRsvp } from '../services/rsvps'
-import { supabase } from '../services/supabase'
+import { rsvpRecordSchema } from '../../shared/rsvp'
+import { ApiError } from '../services/api'
+import {
+  deleteRsvp,
+  getRsvpDashboardStats,
+  getSession,
+  listRsvps,
+  logout,
+  updateRsvp,
+} from '../services/rsvps'
 import type { RsvpDashboardStats } from '../services/rsvps'
 import type {
   AttendanceStatus,
@@ -23,8 +31,7 @@ function formatNameDisplay(name: string): string {
 
 function toEditForm(rsvp: RsvpRecord): UpdateRsvpRecord {
   return {
-    first_name: rsvp.first_name,
-    last_name: rsvp.last_name,
+    full_name: rsvp.full_name,
     phone: rsvp.phone,
     attendance: rsvp.attendance,
     guest_count: rsvp.guest_count,
@@ -53,40 +60,27 @@ export default function AdminDashboardPage() {
         setLoading(true)
         setError(null)
 
-        if (!supabase) {
-          throw new Error('Missing Supabase environment variables.')
-        }
-
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
-
-        if (sessionError) {
-          throw sessionError
-        }
+        const session = await getSession()
 
         if (!session) {
           navigate('/admin/login', { replace: true })
           return
         }
 
-        const [rsvpResult, statsResult] = await Promise.all([
-          supabase
-            .from('rsvps')
-            .select('*')
-            .order('first_name', { ascending: true }),
-
+        const [rsvpList, statsResult] = await Promise.all([
+          listRsvps(),
           getRsvpDashboardStats(),
         ])
 
-        if (rsvpResult.error) {
-          throw rsvpResult.error
-        }
-
-        setRsvps((rsvpResult.data ?? []) as RsvpRecord[])
+        setRsvps(rsvpList)
         setStats(statsResult)
       } catch (err) {
+        // Session expired between the check and the data load
+        if (err instanceof ApiError && err.status === 401) {
+          navigate('/admin/login', { replace: true })
+          return
+        }
+
         setError(
           err instanceof Error
             ? err.message
@@ -128,24 +122,10 @@ export default function AdminDashboardPage() {
     })
   }
 
+  // Same rules the API enforces (shared/rsvp.ts)
   const validateEditForm = (form: UpdateRsvpRecord) => {
-    if (!form.first_name.trim() || !form.last_name.trim()) {
-      return 'First and last name are required.'
-    }
-
-    if (!form.phone.trim()) {
-      return 'Phone number is required.'
-    }
-
-    if (!Number.isInteger(form.guest_count) || form.guest_count < 1) {
-      return 'Guest count must be a whole number of at least 1.'
-    }
-
-    if ((form.message?.length ?? 0) > 500) {
-      return 'Message cannot exceed 500 characters.'
-    }
-
-    return null
+    const parsed = rsvpRecordSchema.safeParse(form)
+    return parsed.success ? null : (parsed.error.issues[0]?.message ?? 'Please check this RSVP.')
   }
 
   const refreshStats = async () => {
@@ -155,7 +135,7 @@ export default function AdminDashboardPage() {
   const handleRsvpCreated = async (newRsvp: RsvpRecord) => {
     setRsvps((currentRsvps) =>
       [...currentRsvps, newRsvp].sort((a, b) =>
-        a.first_name.localeCompare(b.first_name),
+        a.full_name.localeCompare(b.full_name),
       ),
     )
     await refreshStats()
@@ -195,7 +175,7 @@ export default function AdminDashboardPage() {
 
   const handleDeleteRsvp = async (rsvp: RsvpRecord) => {
     const shouldDelete = window.confirm(
-      `Delete RSVP for ${rsvp.first_name} ${rsvp.last_name}? This cannot be undone.`,
+      `Delete RSVP for ${rsvp.full_name}? This cannot be undone.`,
     )
 
     if (!shouldDelete) {
@@ -227,13 +207,11 @@ export default function AdminDashboardPage() {
   }
 
   const handleLogout = async () => {
-    if (!supabase) {
+    try {
+      await logout()
+    } finally {
       navigate('/admin/login', { replace: true })
-      return
     }
-
-    await supabase.auth.signOut()
-    navigate('/admin/login', { replace: true })
   }
 
   if (loading) {
@@ -247,7 +225,7 @@ export default function AdminDashboardPage() {
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const filteredRsvps = normalizedQuery
     ? rsvps.filter((rsvp) =>
-        [rsvp.first_name, rsvp.last_name, rsvp.phone]
+        [rsvp.full_name, rsvp.phone]
           .join(' ')
           .toLowerCase()
           .includes(normalizedQuery),
@@ -317,7 +295,6 @@ export default function AdminDashboardPage() {
         <table className="admin-table">
           <colgroup>
             <col className="admin-col-name" />
-            <col className="admin-col-name" />
             <col className="admin-col-phone" />
             <col className="admin-col-status" />
             <col className="admin-col-total" />
@@ -327,8 +304,7 @@ export default function AdminDashboardPage() {
 
           <thead>
             <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
+              <th>Name</th>
               <th>Phone</th>
               <th>Attendance</th>
               <th>Guests</th>
@@ -348,29 +324,14 @@ export default function AdminDashboardPage() {
                       {isEditing ? (
                         <input
                           className="admin-table-input"
-                          value={editForm.first_name}
+                          value={editForm.full_name}
                           onChange={(event) =>
-                            updateEditField('first_name', event.target.value)
+                            updateEditField('full_name', event.target.value)
                           }
-                          aria-label="First name"
+                          aria-label="Full name"
                         />
                       ) : (
-                        rsvp.first_name
-                      )}
-                    </td>
-
-                    <td>
-                      {isEditing ? (
-                        <input
-                          className="admin-table-input"
-                          value={editForm.last_name}
-                          onChange={(event) =>
-                            updateEditField('last_name', event.target.value)
-                          }
-                          aria-label="Last name"
-                        />
-                      ) : (
-                        formatNameDisplay(rsvp.last_name)
+                        formatNameDisplay(rsvp.full_name)
                       )}
                     </td>
 
