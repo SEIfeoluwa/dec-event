@@ -7,6 +7,10 @@ export interface RsvpDashboardStats {
   yes_responses: number
   no_responses: number
   total_attending_guests: number
+  ofada_guests: number
+  amala_guests: number
+  jollof_guests: number
+  no_meal_guests: number
 }
 
 const json = (method: string, body: unknown): RequestInit => ({
@@ -23,6 +27,7 @@ export async function createRsvp(input: RSVPInput): Promise<RsvpRecord> {
     attendance: input.attendance,
     guest_count: input.guestCount,
     message: input.message?.trim() || null,
+    meal: input.meal,
   }
 
   try {

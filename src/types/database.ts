@@ -1,3 +1,5 @@
+import type { MealChoice } from '../../shared/rsvp'
+
 export type AttendanceStatus = 'yes' | 'no'
 
 /** An RSVP as returned by the API (see server/db/schema.ts). */
@@ -8,6 +10,7 @@ export type RsvpRecord = {
   attendance: AttendanceStatus
   guest_count: number
   message: string | null
+  meal: MealChoice | null
   created_at: string
 }
 

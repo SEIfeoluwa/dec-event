@@ -21,6 +21,19 @@ export function normalizePhone(input: string): string | null {
   return null
 }
 
+/** Meal options guests choose from when attending (one per RSVP). */
+export const MEALS = [
+  { id: 'ofada', label: 'White rice, beans & plantain with ofada stew' },
+  { id: 'amala', label: 'Amala on the spot' },
+  { id: 'jollof', label: 'Jollof rice, moi moi & plantain' },
+] as const
+
+export const MEAL_IDS = ['ofada', 'amala', 'jollof'] as const satisfies readonly (typeof MEALS)[number]['id'][]
+export type MealChoice = (typeof MEAL_IDS)[number]
+
+export const mealLabel = (id: MealChoice | null | undefined) =>
+  MEALS.find((meal) => meal.id === id)?.label ?? null
+
 export const MESSAGES = {
   name: 'Enter your full name.',
   nameTooLong: `Name cannot exceed ${RSVP_LIMITS.nameMax} characters.`,
@@ -29,6 +42,7 @@ export const MESSAGES = {
   guests: 'Guest count must be a whole number of at least 1.',
   guestsTooMany: `Guest count cannot exceed ${RSVP_LIMITS.guestsMax}. Please contact the family for larger parties.`,
   messageTooLong: `Message cannot exceed ${RSVP_LIMITS.messageMax} characters.`,
+  meal: 'Choose a meal.',
 } as const
 
 /** API payload for creating or updating an RSVP (the full record minus id). */
@@ -60,11 +74,18 @@ export const rsvpRecordSchema = z
       .max(RSVP_LIMITS.messageMax, MESSAGES.messageTooLong)
       .nullish()
       .transform((message) => message || null),
+    // Optional here so RSVPs made before meals were added stay valid; the
+    // guest form always asks for one when attending.
+    meal: z
+      .enum(MEAL_IDS, { error: MESSAGES.meal })
+      .nullish()
+      .transform((meal) => meal ?? null),
   })
-  // "Not attending" always means 0 guests
+  // "Not attending" always means 0 guests and no meal
   .transform((rsvp) => ({
     ...rsvp,
     guest_count: rsvp.attendance === 'no' ? 0 : rsvp.guest_count,
+    meal: rsvp.attendance === 'no' ? null : rsvp.meal,
   }))
   .refine((rsvp) => rsvp.attendance === 'no' || rsvp.guest_count >= 1, {
     message: MESSAGES.guests,

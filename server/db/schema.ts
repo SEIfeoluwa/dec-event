@@ -1,6 +1,9 @@
 import { integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
+import { MEAL_IDS } from '../../shared/rsvp.js'
+
 export const attendanceEnum = pgEnum('attendance', ['yes', 'no'])
+export const mealEnum = pgEnum('meal', MEAL_IDS)
 
 export const rsvps = pgTable('rsvps', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -11,6 +14,8 @@ export const rsvps = pgTable('rsvps', {
   attendance: attendanceEnum('attendance').notNull(),
   guest_count: integer('guest_count').notNull().default(0),
   message: text('message'),
+  // Null when not attending, or for RSVPs made before meals were offered
+  meal: mealEnum('meal'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

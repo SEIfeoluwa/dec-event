@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import type { ZodError } from 'zod'
 
 import { loginSchema, rsvpRecordSchema } from '../shared/rsvp.js'
+import type { MealChoice } from '../shared/rsvp.js'
 import { createSession, destroySession, getAdmin, requireAdmin, verifyLogin } from './auth.js'
 import { db, rsvps } from './db/index.js'
 
@@ -65,6 +66,9 @@ app.post('/auth/logout', async (c) => {
 
 // ---------- Admin ----------
 
+const mealGuests = (meal: MealChoice) =>
+  sql<number>`coalesce(sum(${rsvps.guest_count}) filter (where ${rsvps.attendance} = 'yes' and ${rsvps.meal} = ${meal}), 0)::int`
+
 // Registered before /rsvps/:id so "stats" isn't treated as an id
 app.get('/rsvps/stats', requireAdmin, async (c) => {
   const [stats] = await db
@@ -73,6 +77,11 @@ app.get('/rsvps/stats', requireAdmin, async (c) => {
       yes_responses: sql<number>`count(*) filter (where ${rsvps.attendance} = 'yes')::int`,
       no_responses: sql<number>`count(*) filter (where ${rsvps.attendance} = 'no')::int`,
       total_attending_guests: sql<number>`coalesce(sum(${rsvps.guest_count}) filter (where ${rsvps.attendance} = 'yes'), 0)::int`,
+      // Guests per meal (each RSVP picks one meal for its whole party)
+      ofada_guests: mealGuests('ofada'),
+      amala_guests: mealGuests('amala'),
+      jollof_guests: mealGuests('jollof'),
+      no_meal_guests: sql<number>`coalesce(sum(${rsvps.guest_count}) filter (where ${rsvps.attendance} = 'yes' and ${rsvps.meal} is null), 0)::int`,
     })
     .from(rsvps)
   return c.json(stats)

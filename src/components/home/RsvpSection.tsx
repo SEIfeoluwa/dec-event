@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
-import { RSVP_LIMITS } from '../../../shared/rsvp'
+import { MEALS, RSVP_LIMITS } from '../../../shared/rsvp'
+import type { MealChoice } from '../../../shared/rsvp'
+import Modal from '../common/Modal'
 import { createRsvp } from '../../services/rsvps'
 import { rsvpSchema } from '../../schemas/rsvpSchema'
 import type { RSVPInput } from '../../schemas/rsvpSchema'
@@ -11,9 +13,10 @@ interface RsvpProps {
   onRsvpClick?: () => void
 }
 
-type FormData = Omit<RSVPInput, 'attendance' | 'guestCount'> & {
+type FormData = Omit<RSVPInput, 'attendance' | 'guestCount' | 'meal'> & {
   attendance: RSVPInput['attendance'] | ''
   guestCount: string
+  meal: MealChoice | ''
 }
 
 const initialFormData: FormData = {
@@ -22,6 +25,7 @@ const initialFormData: FormData = {
   attendance: '',
   guestCount: '1',
   message: '',
+  meal: '',
 }
 
 interface FormState {
@@ -37,6 +41,8 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
     error: null,
     success: null,
   })
+  // Attending guests choose a meal in a pop-up before the RSVP is sent
+  const [mealPickerOpen, setMealPickerOpen] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -78,10 +84,47 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
     textarea.style.height = `${textarea.scrollHeight + borders}px`
   }, [formData.message])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const submitRsvp = async (data: FormData) => {
     setFormState({ submitting: true, error: null, success: null })
 
+    const parsed = rsvpSchema.safeParse(data)
+
+    if (!parsed.success) {
+      setMealPickerOpen(false)
+      setFormState({
+        submitting: false,
+        error: parsed.error.issues[0]?.message ?? 'Please check your RSVP details.',
+        success: null,
+      })
+      return
+    }
+
+    try {
+      await createRsvp(parsed.data)
+      setMealPickerOpen(false)
+      setFormData(initialFormData)
+      setFormState({
+        submitting: false,
+        error: null,
+        success: 'Thank you. Your RSVP has been submitted.',
+      })
+      onRsvpClick?.()
+    } catch (err) {
+      // Back to the form so they can fix it (e.g. a phone number already used);
+      // their meal choice is kept for the next try.
+      setMealPickerOpen(false)
+      setFormState({
+        submitting: false,
+        error: err instanceof Error ? err.message : 'Unable to submit your RSVP.',
+        success: null,
+      })
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    // Check the form first, so the meal pop-up only opens once it's valid
     const parsed = rsvpSchema.safeParse(formData)
 
     if (!parsed.success) {
@@ -93,22 +136,17 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
       return
     }
 
-    try {
-      await createRsvp(parsed.data)
-      setFormData(initialFormData)
-      setFormState({
-        submitting: false,
-        error: null,
-        success: 'Thank you. Your RSVP has been submitted.',
-      })
-      onRsvpClick?.()
-    } catch (err) {
-      setFormState({
-        submitting: false,
-        error: err instanceof Error ? err.message : 'Unable to submit your RSVP.',
-        success: null,
-      })
+    if (parsed.data.attendance === 'yes') {
+      setFormState({ submitting: false, error: null, success: null })
+      setMealPickerOpen(true)
+      return
     }
+
+    void submitRsvp(formData)
+  }
+
+  const closeMealPicker = () => {
+    if (!formState.submitting) setMealPickerOpen(false)
   }
 
   if (RSVP_CLOSED) {
@@ -257,6 +295,51 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
           {formState.submitting ? 'Submitting...' : 'Submit RSVP'}
         </button>
       </form>
+
+      {mealPickerOpen && (
+        <Modal title="Choose your meal" onClose={closeMealPicker}>
+          <p>
+            {guestCountValue > 1
+              ? 'Please choose one meal for your party.'
+              : 'Please choose your meal for the celebration.'}
+          </p>
+
+          <div className="meal-options" role="radiogroup" aria-label="Meal">
+            {MEALS.map((meal, index) => (
+              <button
+                key={meal.id}
+                type="button"
+                role="radio"
+                aria-checked={formData.meal === meal.id}
+                className="meal-option"
+                onClick={() => setFormData((prev) => ({ ...prev, meal: meal.id }))}
+                autoFocus={formData.meal ? formData.meal === meal.id : index === 0}
+              >
+                {meal.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="meal-actions">
+            <button
+              type="button"
+              className="add-rsvp-cancel"
+              onClick={closeMealPicker}
+              disabled={formState.submitting}
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              className="add-rsvp-submit"
+              onClick={() => void submitRsvp(formData)}
+              disabled={!formData.meal || formState.submitting}
+            >
+              {formState.submitting ? 'Submitting...' : 'Confirm & Submit RSVP'}
+            </button>
+          </div>
+        </Modal>
+      )}
     </section>
   )
 }

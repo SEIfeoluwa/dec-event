@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { MEALS } from '../../../shared/rsvp'
+import type { MealChoice } from '../../../shared/rsvp'
 import Modal from '../common/Modal'
 import { createRsvp } from '../../services/rsvps'
 import { rsvpSchema } from '../../schemas/rsvpSchema'
@@ -11,9 +13,10 @@ interface AddRsvpModalProps {
   onCreated: (rsvp: RsvpRecord) => void
 }
 
-type FormData = Omit<RSVPInput, 'attendance' | 'guestCount'> & {
+type FormData = Omit<RSVPInput, 'attendance' | 'guestCount' | 'meal'> & {
   attendance: RSVPInput['attendance'] | ''
   guestCount: string
+  meal: MealChoice | ''
 }
 
 const initialFormData: FormData = {
@@ -22,6 +25,7 @@ const initialFormData: FormData = {
   attendance: '',
   guestCount: '1',
   message: '',
+  meal: '',
 }
 
 export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) {
@@ -120,6 +124,25 @@ export default function AddRsvpModal({ onClose, onCreated }: AddRsvpModalProps) 
               inputMode="numeric"
               required
             />
+          </div>
+        )}
+
+        {formData.attendance === 'yes' && (
+          <div className="form-group">
+            <label htmlFor="addRsvpMeal">Meal</label>
+            <select
+              id="addRsvpMeal"
+              name="meal"
+              value={formData.meal}
+              onChange={handleChange}
+            >
+              <option value="">Not chosen yet</option>
+              {MEALS.map((meal) => (
+                <option key={meal.id} value={meal.id}>
+                  {meal.label}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 

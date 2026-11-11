@@ -1,17 +1,18 @@
-import galleryImageOne from '../../assets/gallery-1.jpg'
-import galleryImageTwo from '../../assets/gallery-2.jpg'
-import galleryImageThree from '../../assets/gallery-3.jpg'
-import galleryImageFour from '../../assets/gallery-4.jpg'
-import galleryImageFive from '../../assets/gallery-5.jpg'
-import galleryImageSix from '../../assets/gallery-6.jpg'
+import tealGown from '../../assets/gallery-1.jpg'
+import pinkBlouse from '../../assets/gallery-2.jpg'
+import blueGown from '../../assets/gallery-4.jpg'
+import whiteLaceSuit from '../../assets/gallery-7.jpg'
+import burgundyAsoOke from '../../assets/gallery-8.jpg'
+import orangeSuit from '../../assets/gallery-9.jpg'
 
+// One photo per outfit: no outfit should appear twice in the gallery.
 const galleryImages = [
-  { src: galleryImageOne, alt: 'Pastor Mrs Adebisi in a teal pleated gown' },
-  { src: galleryImageTwo, alt: 'Pastor Mrs Adebisi in a pink striped blouse, seated at a table' },
-  { src: galleryImageThree, alt: 'Pastor Mrs Adebisi in a teal gown, smiling with a hand on her hip' },
-  { src: galleryImageFour, alt: 'Pastor Mrs Adebisi in a royal blue gown, seated on a tufted chair' },
-  { src: galleryImageFive, alt: 'Pastor Mrs Adebisi in a teal pleated gown, full length' },
-  { src: galleryImageSix, alt: 'Close portrait of Pastor Mrs Adebisi in a pink striped blouse' },
+  { src: tealGown, alt: 'Pastor Mrs Adebisi in a teal pleated gown' },
+  { src: whiteLaceSuit, alt: 'Pastor and Pastor Mrs Adebisi, she in a white lace suit' },
+  { src: pinkBlouse, alt: 'Pastor Mrs Adebisi in a pink striped blouse, seated at a table' },
+  { src: burgundyAsoOke, alt: 'Pastor and Pastor Mrs Adebisi in traditional attire, she in burgundy with a matching gele' },
+  { src: blueGown, alt: 'Pastor Mrs Adebisi in a royal blue gown, seated on a tufted chair' },
+  { src: orangeSuit, alt: 'Pastor Mrs Adebisi in an orange skirt suit' },
 ]
 
 export default function Gallery() {

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ModalProps {
   title: string
@@ -19,7 +20,9 @@ export default function Modal({ title, onClose, children }: ModalProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  return (
+  // Rendered at the end of <body> so styles of the section that opened it
+  // (e.g. the RSVP form's button styles) can't leak into the pop-up.
+  return createPortal(
     <div
       className="modal-overlay"
       onClick={onClose}
@@ -46,6 +49,7 @@ export default function Modal({ title, onClose, children }: ModalProps) {
 
         <div className="modal-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

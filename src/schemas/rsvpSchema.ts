@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MESSAGES, RSVP_LIMITS, normalizePhone } from "../../shared/rsvp";
+import { MEAL_IDS, MESSAGES, RSVP_LIMITS, normalizePhone } from "../../shared/rsvp";
 
 // Form-side validation for the guest RSVP form and admin "Add RSVP" pop-up.
 // Uses the same limits and messages as the API (shared/rsvp.ts).
@@ -11,11 +11,17 @@ const rsvpFieldsSchema = z.object({
     // Only checked when attending; the field is hidden for "no".
     guestCount: z.union([z.string(), z.number()]),
     message: z.string().trim().max(RSVP_LIMITS.messageMax, MESSAGES.messageTooLong).optional(),
+    // "" means not chosen yet. The guest form asks for a meal in a pop-up
+    // before submitting; the admin "Add RSVP" form may leave it blank.
+    meal: z
+        .union([z.enum(MEAL_IDS), z.literal("")])
+        .optional()
+        .transform((meal) => meal || null),
 });
 
 export const rsvpSchema = rsvpFieldsSchema.transform((data, ctx) => {
     if (data.attendance === "no") {
-        return { ...data, guestCount: 0 };
+        return { ...data, guestCount: 0, meal: null };
     }
 
     const guestCount = Number(data.guestCount);

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import AddRsvpModal from '../components/admin/AddRsvpModal'
-import { rsvpRecordSchema } from '../../shared/rsvp'
+import { MEALS, mealLabel, rsvpRecordSchema } from '../../shared/rsvp'
+import type { MealChoice } from '../../shared/rsvp'
 import { ApiError } from '../services/api'
 import {
   deleteRsvp,
@@ -36,6 +37,7 @@ function toEditForm(rsvp: RsvpRecord): UpdateRsvpRecord {
     attendance: rsvp.attendance,
     guest_count: rsvp.guest_count,
     message: rsvp.message,
+    meal: rsvp.meal,
   }
 }
 
@@ -281,6 +283,22 @@ export default function AdminDashboardPage() {
         </section>
       )}
 
+      {stats && (
+        <section className="dashboard-stats dashboard-stats-full" aria-label="Meals">
+          {MEALS.map((meal) => (
+            <article className="stat-card" key={meal.id}>
+              <h2>{stats[`${meal.id}_guests`]}</h2>
+              <p>{meal.label}</p>
+            </article>
+          ))}
+
+          <article className="stat-card">
+            <h2>{stats.no_meal_guests}</h2>
+            <p>No meal chosen</p>
+          </article>
+        </section>
+      )}
+
       <div className="admin-toolbar">
         <button
           type="button"
@@ -298,6 +316,7 @@ export default function AdminDashboardPage() {
             <col className="admin-col-phone" />
             <col className="admin-col-status" />
             <col className="admin-col-total" />
+            <col className="admin-col-meal" />
             <col className="admin-col-message" />
             <col className="admin-col-actions" />
           </colgroup>
@@ -308,6 +327,7 @@ export default function AdminDashboardPage() {
               <th>Phone</th>
               <th>Attendance</th>
               <th>Guests</th>
+              <th>Meal</th>
               <th>Message</th>
               <th>Actions</th>
             </tr>
@@ -395,6 +415,37 @@ export default function AdminDashboardPage() {
                         />
                       ) : (
                         rsvp.guest_count
+                      )}
+                    </td>
+
+                    <td>
+                      {isEditing ? (
+                        editForm.attendance === 'yes' ? (
+                          <select
+                            className="admin-table-input"
+                            value={editForm.meal ?? ''}
+                            onChange={(event) =>
+                              updateEditField(
+                                'meal',
+                                (event.target.value || null) as MealChoice | null,
+                              )
+                            }
+                            aria-label="Meal"
+                          >
+                            <option value="">Not chosen</option>
+                            {MEALS.map((meal) => (
+                              <option key={meal.id} value={meal.id}>
+                                {meal.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          '—'
+                        )
+                      ) : rsvp.attendance === 'yes' ? (
+                        mealLabel(rsvp.meal) ?? 'Not chosen'
+                      ) : (
+                        '—'
                       )}
                     </td>
 
