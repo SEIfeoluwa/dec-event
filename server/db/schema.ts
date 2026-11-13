@@ -33,3 +33,12 @@ export const sessions = pgTable('sessions', {
     .references(() => admins.id, { onDelete: 'cascade' }),
   expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
 })
+
+// Failed admin logins, kept briefly so repeated password guessing can be
+// locked out (see server/auth.ts). Old rows are deleted as new ones arrive.
+export const loginFailures = pgTable('login_failures', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull(),
+  ip: text('ip').notNull(),
+  attempted_at: timestamp('attempted_at', { withTimezone: true }).notNull().defaultNow(),
+})

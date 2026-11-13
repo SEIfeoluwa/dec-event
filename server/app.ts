@@ -4,7 +4,18 @@ import type { ZodError } from 'zod'
 
 import { loginSchema, rsvpRecordSchema } from '../shared/rsvp.js'
 import type { MealChoice } from '../shared/rsvp.js'
-import { createSession, destroySession, getAdmin, requireAdmin, verifyLogin } from './auth.js'
+import {
+  clearLoginFailures,
+  clientIp,
+  createSession,
+  destroySession,
+  getAdmin,
+  isLoginLocked,
+  LOGIN_LOCK_MINUTES,
+  recordLoginFailure,
+  requireAdmin,
+  verifyLogin,
+} from './auth.js'
 import { db, rsvps } from './db/index.js'
 
 // Served from the same domain as the site under /api, so no CORS is needed
@@ -47,9 +58,25 @@ app.post('/auth/login', async (c) => {
   const parsed = loginSchema.safeParse(await readJson(c))
   if (!parsed.success) return c.json({ error: 'Enter your email and password.' }, 400)
 
-  const admin = await verifyLogin(parsed.data.email, parsed.data.password)
-  if (!admin) return c.json({ error: 'Incorrect email or password.' }, 401)
+  const { email, password } = parsed.data
+  const ip = clientIp(c)
 
+  // Checked before the password, so a locked-out guesser learns nothing
+  if (await isLoginLocked(email, ip)) {
+    c.header('Retry-After', String(LOGIN_LOCK_MINUTES * 60))
+    return c.json(
+      { error: `Too many failed login attempts. Please wait ${LOGIN_LOCK_MINUTES} minutes and try again.` },
+      429,
+    )
+  }
+
+  const admin = await verifyLogin(email, password)
+  if (!admin) {
+    await recordLoginFailure(email, ip)
+    return c.json({ error: 'Incorrect email or password.' }, 401)
+  }
+
+  await clearLoginFailures(email)
   await createSession(c, admin.id)
   return c.json({ email: admin.email })
 })
