@@ -475,27 +475,33 @@
     text-shadow: none;
   }
 
-  /* Auto-scrolling strip: no scrollbar, loops forever, pauses on hover */
+  /* Auto-scrolling strip that visitors can also scroll by hand; no scrollbar,
+     loops forever, pauses on hover (driven by GallerySection) */
   .gallery-marquee {
     max-width: 1500px;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
     /* Room for the hover lift and shadows so they aren't clipped */
     padding: 8px 0 24px;
     /* Soft fade at both edges */
     mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
 
-    &:hover .gallery-track {
-      animation-play-state: paused;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &.is-dragging {
+      cursor: grabbing;
     }
   }
 
   .gallery-track {
     display: flex;
     width: max-content;
-    /* The track holds two copies of the photos; moving it by half its
-       width lands exactly where it started, so the loop is seamless. */
-    animation: gallery-scroll 60s linear infinite;
 
     img {
       width: 300px;
@@ -525,31 +531,13 @@
   /* Visitors who ask for less motion get a still, swipeable row instead */
   @media (prefers-reduced-motion: reduce) {
     .gallery-marquee {
-      overflow-x: auto;
-      scrollbar-width: none;
+      cursor: auto;
       mask-image: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
     }
 
-    .gallery-track {
-      animation: none;
-
-      img[aria-hidden='true'] {
-        display: none;
-      }
+    .gallery-track img[aria-hidden='true'] {
+      display: none;
     }
-  }
-}
-
-@keyframes gallery-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
   }
 }
 
