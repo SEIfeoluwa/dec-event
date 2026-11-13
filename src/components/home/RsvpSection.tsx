@@ -9,6 +9,15 @@ import type { RSVPInput } from '../../schemas/rsvpSchema'
 
 const RSVP_CLOSED = false
 
+// Keep in sync with public/pastor-adebisi-60th.ics
+const GOOGLE_CALENDAR_URL = `https://calendar.google.com/calendar/render?${new URLSearchParams({
+  action: 'TEMPLATE',
+  text: "Pastor Mrs Adebisi's 60th Birthday Celebration",
+  dates: '20261208T230000Z/20261209T020000Z',
+  details: 'Dress code: Grace & Royalty. Color of the day: Touch of Blue.',
+  location: '1625 Olive St NE, Washington, DC 20019',
+})}`
+
 interface RsvpProps {
   onRsvpClick?: () => void
 }
@@ -43,6 +52,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
   })
   // Attending guests choose a meal in a pop-up before the RSVP is sent
   const [mealPickerOpen, setMealPickerOpen] = useState(false)
+  const [showCalendarLinks, setShowCalendarLinks] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -86,6 +96,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
 
   const submitRsvp = async (data: FormData) => {
     setFormState({ submitting: true, error: null, success: null })
+    setShowCalendarLinks(false)
 
     const parsed = rsvpSchema.safeParse(data)
 
@@ -103,6 +114,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
       await createRsvp(parsed.data)
       setMealPickerOpen(false)
       setFormData(initialFormData)
+      setShowCalendarLinks(parsed.data.attendance === 'yes')
       setFormState({
         submitting: false,
         error: null,
@@ -138,6 +150,7 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
 
     if (parsed.data.attendance === 'yes') {
       setFormState({ submitting: false, error: null, success: null })
+      setShowCalendarLinks(false)
       setMealPickerOpen(true)
       return
     }
@@ -290,6 +303,15 @@ export default function Rsvp({ onRsvpClick }: RsvpProps) {
 
         {formState.error && <p className="form-status form-status-error">{formState.error}</p>}
         {formState.success && <p className="form-status form-status-success">{formState.success}</p>}
+        {showCalendarLinks && (
+          <div className="calendar-links">
+            <p>Add a reminder to your calendar:</p>
+            <a href={GOOGLE_CALENDAR_URL} target="_blank" rel="noopener noreferrer">
+              Google Calendar
+            </a>
+            <a href="/pastor-adebisi-60th.ics">Apple / Outlook</a>
+          </div>
+        )}
 
         <button type="submit" className="submit-btn" disabled={formState.submitting}>
           {formState.submitting ? 'Submitting...' : 'Submit RSVP'}

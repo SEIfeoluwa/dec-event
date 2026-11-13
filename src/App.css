@@ -1160,6 +1160,41 @@
   color: #dff6d8;
 }
 
+.calendar-links {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+
+  p {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 15px;
+    text-align: center;
+    color: var(--event-pearl);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--event-accent);
+    border-radius: 8px;
+    color: var(--event-pearl);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: var(--event-accent);
+      color: var(--event-deep);
+    }
+  }
+}
+
 /* Button styles */
 button {
   font-family: 'Lato', sans-serif;
